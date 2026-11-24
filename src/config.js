@@ -76,7 +76,7 @@ export const SECRET = {
 // På localhost kan den sættes med ?scores=http://localhost:8788 (kun til test).
 const LOCAL_TEST = typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
   ? new URLSearchParams(location.search).get('scores') : null;
-export const SCORES_URL = LOCAL_TEST || null;
+export const SCORES_URL = LOCAL_TEST || 'https://amager-spil-scores.stemplerind.workers.dev';
 
 // Navne på listen
 export const NAME_MAX = 12;
