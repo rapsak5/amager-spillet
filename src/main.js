@@ -15,7 +15,7 @@ import ScoresScene from './scenes/ScoresScene.js';
 import SecretScene from './scenes/SecretScene.js';
 import { unlock } from './systems/audio.js';
 
-const game = new Phaser.Game({
+new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   title: 'Julefrokost på Amager',
@@ -33,4 +33,3 @@ const game = new Phaser.Game({
 // Lyd må først starte efter et tryk. Prøv ved hvert første input.
 for (const ev of ['pointerup', 'touchend', 'click', 'keydown']) window.addEventListener(ev, unlock, { passive: true });
 
-window.__game = game;   // til test og fejlsøgning i konsollen

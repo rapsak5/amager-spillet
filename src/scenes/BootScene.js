@@ -62,7 +62,10 @@ export default class BootScene extends Phaser.Scene {
     loop('shark', ['enemy/shark0', 'enemy/shark1'], 6);
     loop('jelly', ['enemy/jelly0', 'enemy/jelly1'], 4);
 
-    // Kun topscorerlisten kan åbnes direkte: ?scene=Scores. Testgenvejene er fjernet i den udgivne version.
+    // Spillet er klar: ai-workshops logo fra index.html må gå
+    if (typeof window.__hideSplash === 'function') window.__hideSplash();
+
+    // Kun topscorerlisten kan åbnes direkte: ?scene=Scores.
     const q = new URLSearchParams(window.location.search);
     this.scene.start(q.get('scene') === 'Scores' ? 'Scores' : 'Title');
   }

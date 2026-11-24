@@ -1,14 +1,15 @@
 // Topscorerlisten (offentlig udgave).
 //
-// Hver enhed gemmer altid sine egne point (save.js). Er SCORES_URL sat i config.js, sendes
-// spillerens bedste point pr. bane til den fælles liste (server/worker-public.js), og listen
-// hentes derfra. Der er intet login: spilleren kendes på et tilfældigt id på enheden og
-// vises med det navn, man selv har skrevet.
+// Hver enhed gemmer altid sine egne point (save.js). Til den fælles liste (server/worker-public.js)
+// kommer point kun gennem et løb, som serveren selv har startet og taget tid på:
+//   POST /run/start  { pid, level }       -> { ok, run }      når en bane startes
+//   POST /run/finish { pid, run, score }  -> { ok, score, rank }  når målet er nået
+// Serveren afviser løb, der er for hurtige, og point, som banen ikke kan give.
+// Er man offline ved målet, gemmes resultatet og sendes, næste gang der er forbindelse.
 //
-// Serverens API:
 //   GET  /top?me=<pid>  -> { players: [{ name, fisher, score, reached, me }], me: { rank, score, reached } | null, count }
-//   POST /sync          { pid, name, fisher, best: { <bane>: point } }  -> { ok, score, rank }
-//        Serveren beholder det højeste tal pr. bane, så det er ufarligt at sende det samme igen.
+//   POST /sync          { pid, name, fisher }  -> { ok, score, rank }
+// Der er intet login: spilleren kendes på et tilfældigt id på enheden og vises med sit navn.
 
 import { SCORES_URL } from '../config.js';
 import { LEVELS } from '../data/levels.js';
@@ -18,17 +19,61 @@ export const TOP_N = 8;
 
 export function isShared() { return !!SCORES_URL; }
 
-/** Gemmer resultatet for en klaret bane. */
-export function recordLevel(levelIndex, score) {
+function post(path, data) {
+  return fetch(`${SCORES_URL}${path}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), keepalive: true,
+  });
+}
+
+// Alle kald til serveren går i kø, så et resultat altid er sendt, før listen hentes.
+let inflight = Promise.resolve();
+function queue(fn) {
+  const run = () => fn().catch(() => null);
+  inflight = inflight.then(run, run);
+  return inflight;
+}
+
+/** Beder serveren starte et løb på banen. Giver løbets id, eller null uden forbindelse. */
+export async function startRun(levelIndex) {
+  if (!SCORES_URL) return null;
+  const s = Save.load();
+  try {
+    const r = await post('/run/start', { pid: s.pid, level: LEVELS[levelIndex].id });
+    const data = r.ok ? await r.json() : null;
+    return data?.ok ? data.run : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/** Gemmer resultatet for en klaret bane og sender det til serveren, hvis løbet blev startet der. */
+export function recordLevel(levelIndex, score, run = null) {
   const p = Save.player();
   const id = LEVELS[levelIndex].id;
   p.unlocked = Math.min(LEVELS.length, Math.max(p.unlocked, levelIndex + 2));
   if (levelIndex === LEVELS.length - 1) p.done = true;
   const isBest = score > (p.best[id] || 0);
   if (isBest) p.best[id] = score;
+  if (run && SCORES_URL) {
+    const s = Save.load();
+    s.pending = [...(s.pending || []).filter((x) => x.run !== run), { run, score }].slice(-20);
+  }
   Save.persist();
-  if (isBest) sync();
+  flush();
   return { isBest, total: total() };
+}
+
+/** Sender resultater, der venter. Et resultat fjernes, når serveren har svaret (også ved afvisning). */
+function flush() {
+  return queue(async () => {
+    const s = Save.load();
+    for (const item of [...(s.pending || [])]) {
+      const r = await post('/run/finish', { pid: s.pid, run: item.run, score: item.score });
+      if (r.status === 429 || r.status >= 500) break;   // prøv igen senere
+      s.pending = (s.pending || []).filter((x) => x.run !== item.run);
+      Save.persist();
+    }
+  });
 }
 
 export function total() {
@@ -49,7 +94,7 @@ export function localBoard() {
   return { rows: [meRow()], me: { rank: 1, ...meRow() }, count: 1, shared: false };
 }
 
-/** Den fælles liste. Sender først egne point, så listen altid er opdateret. Returnerer null uden server. */
+/** Den fælles liste. Sender først navn og ventende resultater. Returnerer null uden server. */
 export async function fetchBoard() {
   if (!SCORES_URL) return null;
   try {
@@ -66,17 +111,11 @@ export async function fetchBoard() {
   }
 }
 
-let inflight = null;
-
-/** Sender navn, fisker og bedste point. Gør intet, før spilleren har et navn. */
+/** Sender navn og fisker, og derefter ventende resultater. Gør intet, før spilleren har et navn. */
 export function sync() {
   if (!SCORES_URL) return Promise.resolve(null);
   const s = Save.load();
   if (!s.name) return Promise.resolve(null);
-  const body = JSON.stringify({ pid: s.pid, name: s.name, fisher: s.fisher, best: s.progress.best });
-  const run = () => fetch(`${SCORES_URL}/sync`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true,
-  }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  inflight = (inflight || Promise.resolve()).then(run, run);
-  return inflight;
+  queue(() => post('/sync', { pid: s.pid, name: s.name, fisher: s.fisher }));
+  return flush();
 }

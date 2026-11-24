@@ -39,7 +39,7 @@ export default class ResultScene extends Phaser.Scene {
       txt(this, cx, 96, 'ØV!', { font: 'big_o', scale: 3, tint: 0xff8a8a });
       txt(this, cx, 140, 'Duerne vandt denne gang.', { font: 'ui' });
       txt(this, cx, 162, d.checkpoint ? 'Du starter ved dit checkpoint.' : 'Du starter forfra på banen.', { font: 'ui', tint: C.soft });
-      const retry = () => this.scene.start('Level', { levelIndex: d.levelIndex, checkpoint: d.checkpoint });
+      const retry = () => this.scene.start('Level', { levelIndex: d.levelIndex, checkpoint: d.checkpoint, run: d.run });
       button(this, cx, 220, 200, 34, 'PRØV IGEN', retry);
       button(this, cx, 264, 200, 30, 'KORTET', toMap, { color: C.panel });
       this.input.keyboard?.once('keydown-ENTER', retry);

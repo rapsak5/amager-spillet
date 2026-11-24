@@ -1,6 +1,6 @@
 // Fælles konstanter. Alt, der skal justeres på spilfølelsen, står i TUNING.
 
-export const VERSION = '0.5.0-pub';
+export const VERSION = '0.6.0-pub';
 
 // Offentlig udgave til promovering. Alle kan spille, vælge fisker og skrive et navn.
 
@@ -70,13 +70,8 @@ export const SECRET = {
   howTo: 'Skriv koden, når du booker en workshop på ai-workshop.dk.',
 };
 
-// Fælles topscorerliste. null = listen gemmes kun på den enkelte enhed.
-// Sæt til adressen på Cloudflare Workeren i server/worker-public.js,
-// fx 'https://amager-spil-scores.<konto>.workers.dev'.
-// På localhost kan den sættes med ?scores=http://localhost:8788 (kun til test).
-const LOCAL_TEST = typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
-  ? new URLSearchParams(location.search).get('scores') : null;
-export const SCORES_URL = LOCAL_TEST || 'https://amager-spil-scores.stemplerind.workers.dev';
+// Fælles topscorerliste og rabatkoder: adressen på Cloudflare Workeren i server/worker-public.js.
+export const SCORES_URL = 'https://amager-spil-scores.stemplerind.workers.dev';
 
 // Navne på listen
 export const NAME_MAX = 12;

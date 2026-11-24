@@ -3,13 +3,10 @@
 // Serverens API (server/worker-public.js):
 //   POST /claim { pid, email, newsletter } -> { ok, code, sent } eller { ok: false, error }
 // Serveren giver kun en kode, hvis spilleren har klaret alle ti baner, og kun én kode pr. mail.
-// Uden server (fx i testversionen på claude.ai) vises en testkode, der ikke virker.
 
 import { SCORES_URL } from '../config.js';
 import * as Save from './save.js';
 import * as Scores from './scores.js';
-
-export const DEMO_CODE = 'TEST-KODE';
 
 const EMAIL = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[a-z]{2,}$/i;
 
@@ -22,19 +19,16 @@ const ERRORS = {
   taken: 'Den mail har allerede fået en kode.',
   limit: 'Der er hentet nok koder fra denne enhed.',
   name: 'Vælg først et navn på kortet.',
+  slow: 'For mange forsøg. Prøv igen i morgen.',
 };
 
-/** Henter (eller genfinder) koden. Returnerer { ok, code, sent, demo } eller { ok: false, error }. */
+/** Henter (eller genfinder) koden. Returnerer { ok, code, sent } eller { ok: false, error }. */
 export async function claim(rawEmail, newsletter) {
   const email = cleanEmail(rawEmail);
   if (!validEmail(email)) return { ok: false, error: ERRORS.email };
-  if (!SCORES_URL) {
-    const res = { ok: true, code: DEMO_CODE, sent: false, demo: true, email };
-    Save.setClaim(res);
-    return res;
-  }
+  if (!SCORES_URL) return { ok: false, error: 'Koderne er ikke klar endnu. Prøv igen senere.' };
   try {
-    await Scores.sync();   // serveren skal kende de klarede baner
+    await Scores.sync();   // serveren skal have alle ventende resultater først
     const r = await fetch(`${SCORES_URL}/claim`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pid: Save.load().pid, email, newsletter: !!newsletter }),

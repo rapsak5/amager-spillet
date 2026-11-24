@@ -124,7 +124,6 @@ export default class SecretScene extends Phaser.Scene {
     this.keep(this.add.rectangle(cx, 184, 300, 40, C.night));
     const code = this.keep(txt(this, cx, 183, res.code, { font: 'big_o', scale: 2, tint: C.yellow }));
     this.tweens.add({ targets: code, alpha: { from: 0, to: 1 }, duration: 400 });
-    if (res.demo) this.keep(txt(this, cx, 210, 'TESTKODE. DEN VIRKER FØRST, NÅR SPILLET ER ONLINE.', { font: 'small', tint: 0xff8a8a }));
     this.keep(txt(this, cx, 236, SECRET.howTo, { font: 'ui', maxWidth: 380, center: true }));
     const note = res.sent ? `Koden er også sendt til ${res.email}.` : SECRET.validUntil;
     if (note) this.keep(txt(this, cx, 264, note, { font: 'small', tint: C.soft }));

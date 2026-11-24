@@ -27,6 +27,7 @@ export default class LevelScene extends Phaser.Scene {
     this.tutorial = !!data.tutorial;
     this.levelIndex = Phaser.Math.Clamp(data.levelIndex ?? 0, 0, LEVELS.length - 1);
     this.resumeFrom = data.checkpoint || null;
+    this.run = data.run || null;   // løbets id på serveren. Følger med, når man starter forfra efter et nederlag
   }
 
   create() {
@@ -60,6 +61,12 @@ export default class LevelScene extends Phaser.Scene {
     };
 
     this.buildWorld();
+
+    // Serveren tager tid på løbet fra nu. Uden forbindelse tæller banen kun på enheden.
+    if (!this.tutorial && !this.run) {
+      const runFor = this.levelIndex;
+      Scores.startRun(runFor).then((id) => { if (id && !this.run && this.levelIndex === runFor) this.run = id; });
+    }
 
     const startX = this.resumeFrom ? this.resumeFrom.x : 100;
     this.player = new Player(this, startX, GROUND_Y, this.fisherId);
@@ -474,7 +481,7 @@ export default class LevelScene extends Phaser.Scene {
     this.shotUntil = 0;
     const bonus = this.st.hearts * SCORE.heartBonus;
     const total = this.st.score + bonus;
-    const res = Scores.recordLevel(this.levelIndex, total);
+    const res = Scores.recordLevel(this.levelIndex, total, this.run);
     sfx('win');
     this.resetCamera();
     this.scene.pause();
@@ -491,7 +498,7 @@ export default class LevelScene extends Phaser.Scene {
     sfx('lose');
     this.resetCamera();
     this.scene.pause();
-    this.scene.launch('Result', { mode: 'dead', levelIndex: this.levelIndex, checkpoint: this.checkpoint });
+    this.scene.launch('Result', { mode: 'dead', levelIndex: this.levelIndex, checkpoint: this.checkpoint, run: this.run });
   }
 
   pauseGame() {
