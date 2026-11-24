@@ -12,6 +12,7 @@ import QuizScene from './scenes/QuizScene.js';
 import ResultScene from './scenes/ResultScene.js';
 import FinaleScene from './scenes/FinaleScene.js';
 import ScoresScene from './scenes/ScoresScene.js';
+import SecretScene from './scenes/SecretScene.js';
 import { unlock } from './systems/audio.js';
 
 const game = new Phaser.Game({
@@ -26,7 +27,7 @@ const game = new Phaser.Game({
   physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 0 }, debug: false } },
   input: { activePointers: 3 },
   // Rækkefølgen bestemmer, hvad der tegnes øverst: HUD og overlays ligger efter banen.
-  scene: [BootScene, TitleScene, SelectScene, MapScene, LevelScene, HudScene, QuizScene, ResultScene, FinaleScene, ScoresScene],
+  scene: [BootScene, TitleScene, SelectScene, MapScene, LevelScene, HudScene, QuizScene, ResultScene, FinaleScene, SecretScene, ScoresScene],
 });
 
 // Lyd må først starte efter et tryk. Prøv ved hvert første input.

@@ -1,6 +1,6 @@
 // Fælles konstanter. Alt, der skal justeres på spilfølelsen, står i TUNING.
 
-export const VERSION = '0.4.0-pub';
+export const VERSION = '0.5.0-pub';
 
 // Offentlig udgave til promovering. Alle kan spille, vælge fisker og skrive et navn.
 
@@ -48,13 +48,26 @@ export const SCORE = {
 
 export const DEPTH = { sky: 0, far: 1, mid: 2, ground: 5, pit: 6, ent: 10, boss: 15, player: 20, fx: 30, snow: 40 };
 
-// Afsender og reklame. Vises på forsiden og på slutskærmen.
+// Afsender og reklame. Vises på forsiden, topscorerlisten, slutskærmen og hemmeligheden.
 export const PROMO = {
-  presents: 'ai-workshop.dk præsenterer',
-  credit: 'Bygget med AI af ai-workshop.dk',
-  pitch: 'Vil du lære at bygge sådan noget med AI?',
+  presents: 'ai-workshop præsenterer',
+  credit: 'Et spil fra ai-workshop.dk',
   url: 'https://ai-workshop.dk',
   label: 'AI-WORKSHOP.DK',
+  teaser: 'KLAR HELE AMAGER OG LÅS HEMMELIGHEDEN OP',
+};
+
+// Hemmeligheden i slutningen: en personlig rabatkode mod en mailadresse.
+// Koden laves af serveren (server/worker-public.js, POST /claim) og gemmes sammen med mailen.
+// Kræver at alle ti baner er klaret. Ret teksterne her, hvis tilbuddet ændrer sig.
+export const SECRET = {
+  headline: '10% RABAT',
+  offer: 'på en workshop fra ai-workshop',
+  cap: 'Højst 2.000 kr. i rabat. Én kode pr. mail.',
+  validUntil: '',   // fx 'Gælder workshops bestilt senest 30. juni 2027'. Tom = vises ikke.
+  newsletter: 'Ja tak til nyhedsbrevet Tre ting om AI',
+  privacy: 'Mailen bruges kun til din kode og, hvis du siger ja, til nyhedsbrevet.',
+  howTo: 'Skriv koden, når du booker en workshop på ai-workshop.dk.',
 };
 
 // Fælles topscorerliste. null = listen gemmes kun på den enkelte enhed.
