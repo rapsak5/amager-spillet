@@ -1,4 +1,4 @@
-// Slutskærmen, når alle ti baner er klaret: point, plads på listen og vejen til hemmeligheden.
+// Slutskærmen, når alle baner er klaret: point, plads på listen og vejen til hemmeligheden.
 
 import { GAME_W } from '../config.js';
 import { txt, panel, button, pad, C } from '../game/ui.js';

@@ -2,6 +2,11 @@
 // Rækkefølgen af svarene blandes i spillet. Fakta tjekket 23/11 2026.
 
 export const QUIZ = [
+  { q: 'Hvilket år åbnede Amager Strandpark med den kunstige ø?', a: ['2005', '1998', '2011'] },
+  { q: 'Hvor lang er stranden i Amager Strandpark cirka?', a: ['4,6 km', '2 km', '8 km'] },
+  { q: 'Hvad hedder badeanstalten på pæle i nordenden af Amager Strand?', a: ['Helgoland', 'Sneglen', 'Kalvebod Bølge'] },
+  { q: 'Hvor mange vindmøller blev rejst på Middelgrunden i 2000?', a: ['20', '12', '40'] },
+  { q: 'Hvad ligger mellem den kunstige ø og den gamle strand?', a: ['En lagune', 'En kanal', 'En lystbådehavn'] },
   { q: 'Hvilke tre kommuner ligger på Amager?', a: ['København, Tårnby og Dragør', 'København, Tårnby og Hvidovre', 'Tårnby, Dragør og Brøndby'] },
   { q: 'Hvad kalder man en person fra Amager?', a: ['Amagerkaner', 'Amagerianer', 'Amagrer'] },
   { q: 'Hvilken konge inviterede hollandske bønder til Amager i 1521?', a: ['Christian 2.', 'Christian 4.', 'Frederik 2.'] },

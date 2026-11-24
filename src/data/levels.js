@@ -193,6 +193,13 @@ export const LEVELS = [
     outro: ['b3', 'g'],
   },
   {
+    id: 'strandpark', name: 'Amager Strandpark', theme: 'strandpark', speed: [305, 375], gap: 1, extra: BALLS,
+    intro: ['r8', 'b3', { hint: 'NUDISTER OG PARASOLLER: HOP!' }, 'x', { hint: 'KITESURFERE: SLÅ DEM NED ELLER SLIDE' }, 'f',
+      { hint: 'REDNINGSKRANSE OG BADEBOLDE: SLÅ DEM VÆK' }, 'd', 'o'],
+    waves: [{ n: 12, pool: 'med', quiz: true }, { n: 9, pool: 'hard', shot: true }, { n: 10, pool: 'hard', quiz: true }],
+    outro: ['b3', 'g'],
+  },
+  {
     id: 'copenhill', name: 'CopenHill', theme: 'copenhill', speed: [310, 380], gap: 1,
     intro: ['r8', 'b3', 'k', 'f'],
     waves: [{ n: 12, pool: 'med', quiz: true }, { n: 10, pool: 'hard', shot: true }, { n: 10, pool: 'hard', quiz: true }],

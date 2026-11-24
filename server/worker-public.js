@@ -13,7 +13,7 @@
 //   GET  /top?me=<pid>&n=8  -> { players: [{ name, fisher, score, reached, me }], me: { rank, score, reached } | null, count }
 //   POST /sync              { pid, name, fisher }  -> { ok, score, rank }   (navn og fisker, aldrig point)
 //   POST /claim             { pid, email, newsletter }  -> { ok, code, sent } eller { ok: false, error, sent? }
-//        Kun spillere med godkendte løb på alle ti baner. Én kode pr. mail, højst 3 pr. enhed.
+//        Kun spillere med godkendte løb på alle baner. Én kode pr. mail, højst 3 pr. enhed.
 //
 // Admin (kræver header Authorization: Bearer <ADMIN_TOKEN>). Uden ADMIN_TOKEN er admin slået fra.
 //   GET  /admin/players                 -> alle spillere med pid, også skjulte
@@ -23,7 +23,7 @@
 //   GET  /admin/rejected                -> de seneste afviste løb (mistanke om snyd)
 
 const FISHERS = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7'];
-const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'center', 'jaguaren', 'copenhill'];
+const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'center', 'jaguaren', 'strandpark', 'copenhill'];
 const NAME_MAX = 12;
 
 // Regnet ud fra banerne (src/data/levels.js) med fuld score på alt, shot-bonus og fire hjerter.
@@ -40,6 +40,7 @@ const LIMITS = {
   campus: { max: 23900, sec: 85 },
   center: { max: 25500, sec: 94 },
   jaguaren: { max: 23400, sec: 101 },
+  strandpark: { max: 29600, sec: 103 },
   copenhill: { max: 39200, sec: 109, perSec: 320 },
 };
 const MIN_SHARE = 0.8;            // et løb skal tage mindst 80% af banens tid
@@ -244,7 +245,7 @@ async function runStart(env, request, body, json) {
   const id = randomId();
   const now = Date.now();
   await env.DB.batch([
-    // kun ét åbent løb pr. spiller, så man ikke kan køre ti baner på én gang
+    // kun ét åbent løb pr. spiller, så man ikke kan køre alle baner på én gang
     env.DB.prepare('UPDATE runs SET state = ? WHERE pid = ? AND state = ?').bind(REPLACED, pid, OPEN),
     env.DB.prepare('INSERT INTO runs (id, pid, level, started, state) VALUES (?, ?, ?, ?, ?)').bind(id, pid, level, now, OPEN),
   ]);

@@ -2,7 +2,7 @@
 //
 // Serverens API (server/worker-public.js):
 //   POST /claim { pid, email, newsletter } -> { ok, code, sent } eller { ok: false, error }
-// Serveren giver kun en kode, hvis spilleren har klaret alle ti baner, og kun én kode pr. mail.
+// Serveren giver kun en kode, hvis spilleren har klaret alle baner, og kun én kode pr. mail.
 
 import { SCORES_URL } from '../config.js';
 import * as Save from './save.js';
@@ -15,7 +15,7 @@ export function validEmail(raw) { return EMAIL.test(cleanEmail(raw)); }
 
 const ERRORS = {
   email: 'Det ligner ikke en mailadresse.',
-  notdone: 'Klar alle ti baner først.',
+  notdone: 'Klar alle elleve baner først.',
   taken: 'Den mail har allerede fået en kode.',
   limit: 'Der er hentet nok koder fra denne enhed.',
   name: 'Vælg først et navn på kortet.',

@@ -1,6 +1,6 @@
 // Fælles konstanter. Alt, der skal justeres på spilfølelsen, står i TUNING.
 
-export const VERSION = '0.6.0-pub';
+export const VERSION = '0.7.0-pub';
 
 // Offentlig udgave til promovering. Alle kan spille, vælge fisker og skrive et navn.
 
@@ -59,7 +59,7 @@ export const PROMO = {
 
 // Hemmeligheden i slutningen: en personlig rabatkode mod en mailadresse.
 // Koden laves af serveren (server/worker-public.js, POST /claim) og gemmes sammen med mailen.
-// Kræver at alle ti baner er klaret. Ret teksterne her, hvis tilbuddet ændrer sig.
+// Kræver at alle baner er klaret. Ret teksterne her, hvis tilbuddet ændrer sig.
 export const SECRET = {
   headline: '10% RABAT',
   offer: 'på en workshop fra ai-workshop',
