@@ -13,6 +13,8 @@ export default class ScoresScene extends Phaser.Scene {
   create() {
     this.add.rectangle(0, 0, GAME_W, GAME_H, C.navy).setOrigin(0);
     txt(this, GAME_W / 2, 24, 'TOPSCORERLISTEN', { font: 'big_o', scale: 2, tint: C.yellow });
+    this.add.image(10, 8, 'brand_mark24').setOrigin(0);
+    this.add.image(GAME_W - 10, 14, 'brand_word96').setOrigin(1, 0);
     const head = (x, s, ox = 0) => txt(this, x, 52, s, { font: 'small', ox, tint: C.yellow });
     head(96, 'PLADS'); head(180, 'NAVN'); head(400, 'POINT', 1); head(430, 'NÅET TIL');
     this.rowObjs = [];

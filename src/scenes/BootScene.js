@@ -31,6 +31,11 @@ export default class BootScene extends Phaser.Scene {
     this.load.image('snow', 'assets/bg/snow.png');
     this.load.image('map', 'assets/bg/map.png');
     this.load.image('secret', 'assets/bg/secret.png');
+    // ai-workshop, afsenderen
+    this.load.image('brand_mark24', 'assets/brand/mark24.png');
+    this.load.image('brand_mark40', 'assets/brand/mark40.png');
+    this.load.image('brand_word96', 'assets/brand/wordmark96.png');
+    this.load.image('brand_word120', 'assets/brand/wordmark120.png');
     for (const f of ['ui', 'ui_o', 'big_o', 'small', 'small_o']) this.load.bitmapFont(f, `assets/fonts/${f}.png`, `assets/fonts/${f}.xml`);
   }
 
@@ -58,6 +63,7 @@ export default class BootScene extends Phaser.Scene {
     loop('jelly', ['enemy/jelly0', 'enemy/jelly1'], 4);
 
     // Genvej til test: ?level=3 starter direkte i bane 3, ?tutorial=1 åbner øvebanen, ?scene=Finale åbner en bestemt skærm, ?alle=1 åbner alle baner
+    window.__hideSplash?.();
     const q = new URLSearchParams(window.location.search);
     if (q.get('fisher')) Save.setFisher(q.get('fisher'));
     if (q.get('alle')) Save.player().unlocked = LEVELS.length;

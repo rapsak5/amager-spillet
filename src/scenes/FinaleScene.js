@@ -1,6 +1,6 @@
-// Slutskærmen, når alle ti baner er klaret: point, plads på listen og en hilsen fra afsenderen.
+// Slutskærmen, når alle ti baner er klaret: point, plads på listen og vejen til hemmeligheden.
 
-import { GAME_W, PROMO } from '../config.js';
+import { GAME_W } from '../config.js';
 import { txt, panel, button, pad, C } from '../game/ui.js';
 import * as Scores from '../systems/scores.js';
 import * as Save from '../systems/save.js';
@@ -29,19 +29,15 @@ export default class FinaleScene extends Phaser.Scene {
         rank.setText(b && b.me ? `NR. ${b.me.rank} AF ${b.count} PÅ LISTEN` : '');
       });
     }
-    txt(this, cx, 206, PROMO.pitch, { font: 'ui', maxWidth: 210, center: true });
-    button(this, cx, 248, 190, 28, PROMO.label, () => openUrl(PROMO.url), { color: C.green, font: 'small_o' });
-    button(this, cx, 284, 190, 28, 'TOPSCORERLISTEN', () => this.scene.start('Scores'));
-    this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('Scores'));
+    const claimed = Save.claim()?.code;
+    txt(this, cx, 212, claimed ? 'DIN RABATKODE LIGGER KLAR' : 'DER VENTER EN HEMMELIGHED', { font: 'small_o', tint: C.yellow });
+    const open = button(this, cx, 248, 190, 30, claimed ? 'DIN RABATKODE' : 'SE HEMMELIGHEDEN', () => this.scene.start('Secret'), { color: C.green });
+    this.tweens.add({ targets: open.label, alpha: 0.35, duration: 550, yoyo: true, repeat: -1 });
+    button(this, cx, 284, 190, 28, 'TOPSCORERLISTEN', () => this.scene.start('Scores'), { color: C.panel });
+    this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('Secret'));
+    // afsender nederst til venstre
+    this.add.image(8, 340, 'brand_mark24').setOrigin(0, 0.5);
+    this.add.image(38, 341, 'brand_word96').setOrigin(0, 0.5);
     sfx('win');
-  }
-}
-
-function openUrl(url) {
-  try {
-    const w = window.open(url, '_blank', 'noopener');
-    if (!w) window.location.href = url;
-  } catch (e) {
-    try { window.location.href = url; } catch (e2) { /* ikke muligt her */ }
   }
 }

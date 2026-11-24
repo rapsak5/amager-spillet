@@ -23,9 +23,18 @@ export default class TitleScene extends Phaser.Scene {
     this.add.sprite(540, GROUND_Y, 'atlas', 'enemy/cat0').setOrigin(0.5, 1).play('cat_walk');
     this.add.sprite(520, GROUND_Y - 150, 'atlas', 'enemy/gull0').play('gull_fly');
 
-    txt(this, GAME_W / 2, 20, PROMO.presents, { font: 'ui_o' });
-    txt(this, GAME_W / 2, 56, 'JULEFROKOST', { font: 'big_o', scale: 3 });
-    txt(this, GAME_W / 2, 102, 'PÅ AMAGER', { font: 'big_o', scale: 3, tint: C.yellow });
+    // afsender: ai-workshops logo og navn
+    const by = 22;
+    const pres = txt(this, 0, by, 'PRÆSENTERER', { font: 'small_o', ox: 0 });
+    const bw = 24 + 6 + 96 + 6 + pres.width;
+    const bx = Math.round(GAME_W / 2 - bw / 2);
+    this.add.rectangle(GAME_W / 2, by, bw + 16, 32, C.night, 0.75);
+    this.add.image(bx, by, 'brand_mark24').setOrigin(0, 0.5);
+    this.add.image(bx + 30, by + 1, 'brand_word96').setOrigin(0, 0.5);
+    pres.setPosition(bx + 132, by + 2);
+    pres.setDepth(1);
+    txt(this, GAME_W / 2, 60, 'JULEFROKOST', { font: 'big_o', scale: 3 });
+    txt(this, GAME_W / 2, 104, 'PÅ AMAGER', { font: 'big_o', scale: 3, tint: C.yellow });
 
     // topscorerlisten i miniformat: de fem bedste
     panel(this, GAME_W / 2 - 126, 130, 252, 132, { alpha: 0.92 });
@@ -37,6 +46,9 @@ export default class TitleScene extends Phaser.Scene {
     this.add.rectangle(GAME_W / 2, 277, 200, 24, C.night, 0.8);
     const start = txt(this, GAME_W / 2, 276, 'TRYK FOR AT SPILLE', { font: 'ui' });
     this.tweens.add({ targets: start, alpha: 0.2, duration: 600, yoyo: true, repeat: -1 });
+    const tz = txt(this, GAME_W / 2, 304, PROMO.teaser, { font: 'small_o', tint: C.yellow });
+    this.add.rectangle(GAME_W / 2, 304, tz.width + 14, 16, C.night, 0.8);
+    tz.setDepth(1);
     txt(this, 6, GAME_H - 6, PROMO.credit.toUpperCase(), { font: 'small_o', ox: 0, oy: 1, tint: C.yellow });
     txt(this, GAME_W - 6, GAME_H - 6, `v${VERSION}`, { font: 'small_o', ox: 1, oy: 1 });
 
