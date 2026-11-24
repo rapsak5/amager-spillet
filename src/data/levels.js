@@ -187,16 +187,23 @@ export const LEVELS = [
     outro: ['b3', 'g'],
   },
   {
-    id: 'jaguaren', name: 'Bodegaen', theme: 'jaguaren', speed: [300, 370], gap: 1,
-    intro: ['r8', 'b3', { hint: 'ROCKERE SLÅR MAN IKKE. HOP!' }, 'x', 'f'],
-    waves: [{ n: 13, pool: 'med', quiz: true }, { n: 8, pool: 'hard', shot: true }, { n: 9, pool: 'hard', quiz: true }],
+    id: 'amagerbio', name: 'Amager Bio', theme: 'amagerbio', speed: [295, 362], gap: 1,
+    intro: ['r8', { hint: 'FADØL! SAML DEM OP' }, 'b3', { hint: 'MUSIKERE OG TROMMESÆT: HOP!' }, 'x',
+      { hint: 'MIKROFONEN SVINGER: SLIDE UNDER' }, 'l', 'f'],
+    waves: [{ n: 12, pool: 'med', quiz: true }, { n: 9, pool: 'hard', shot: true }, { n: 9, pool: 'hard', quiz: true }],
     outro: ['b3', 'g'],
   },
   {
-    id: 'strandpark', name: 'Amager Strandpark', theme: 'strandpark', speed: [305, 375], gap: 1, extra: BALLS,
+    id: 'strandpark', name: 'Amager Strandpark', theme: 'strandpark', speed: [300, 368], gap: 1, extra: BALLS,
     intro: ['r8', 'b3', { hint: 'NUDISTER OG PARASOLLER: HOP!' }, 'x', { hint: 'KITESURFERE: SLÅ DEM NED ELLER SLIDE' }, 'f',
       { hint: 'REDNINGSKRANSE OG BADEBOLDE: SLÅ DEM VÆK' }, 'd', 'o'],
     waves: [{ n: 12, pool: 'med', quiz: true }, { n: 9, pool: 'hard', shot: true }, { n: 10, pool: 'hard', quiz: true }],
+    outro: ['b3', 'g'],
+  },
+  {
+    id: 'jaguaren', name: 'Bodegaen', theme: 'jaguaren', speed: [305, 374], gap: 1,
+    intro: ['r8', 'b3', { hint: 'ROCKERE SLÅR MAN IKKE. HOP!' }, 'x', 'f'],
+    waves: [{ n: 13, pool: 'med', quiz: true }, { n: 8, pool: 'hard', shot: true }, { n: 9, pool: 'hard', quiz: true }],
     outro: ['b3', 'g'],
   },
   {

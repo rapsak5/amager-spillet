@@ -2,6 +2,11 @@
 // Rækkefølgen af svarene blandes i spillet. Fakta tjekket 23/11 2026.
 
 export const QUIZ = [
+  { q: 'Hvad var Amager Bio, før det blev spillested?', a: ['En biograf', 'En fabrik', 'En svømmehal'] },
+  { q: 'Hvilket år blev Amager Bio et spillested?', a: ['1997', '1986', '2005'] },
+  { q: 'Hvad hedder Amager Bios lille scene?', a: ['BETA', 'ALFA', 'Lillesalen'] },
+  { q: 'Hvilken vej ligger Amager Bio på?', a: ['Øresundsvej', 'Holmbladsgade', 'Amagerbrogade'] },
+  { q: 'Hvor mange stående gæster kan Amager Bio cirka rumme?', a: ['1.300', '500', '3.000'] },
   { q: 'Hvilket år åbnede Amager Strandpark med den kunstige ø?', a: ['2005', '1998', '2011'] },
   { q: 'Hvor lang er stranden i Amager Strandpark cirka?', a: ['4,6 km', '2 km', '8 km'] },
   { q: 'Hvad hedder badeanstalten på pæle i nordenden af Amager Strand?', a: ['Helgoland', 'Sneglen', 'Kalvebod Bølge'] },

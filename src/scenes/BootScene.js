@@ -63,6 +63,7 @@ export default class BootScene extends Phaser.Scene {
     loop('jelly', ['enemy/jelly0', 'enemy/jelly1'], 4);
     loop('nudist_run', ['enemy/nudist0', 'enemy/nudist1'], 8);
     loop('kite_fly', ['enemy/kite0', 'enemy/kite1'], 4);
+    loop('guitar_walk', ['enemy/guitar0', 'enemy/guitar1'], 5);
 
     // Spillet er klar: ai-workshops logo fra index.html må gå
     if (typeof window.__hideSplash === 'function') window.__hideSplash();

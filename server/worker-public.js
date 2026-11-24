@@ -23,7 +23,7 @@
 //   GET  /admin/rejected                -> de seneste afviste løb (mistanke om snyd)
 
 const FISHERS = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7'];
-const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'center', 'jaguaren', 'strandpark', 'copenhill'];
+const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'center', 'amagerbio', 'strandpark', 'jaguaren', 'copenhill'];
 const NAME_MAX = 12;
 
 // Regnet ud fra banerne (src/data/levels.js) med fuld score på alt, shot-bonus og fire hjerter.
@@ -39,8 +39,9 @@ const LIMITS = {
   dr: { max: 22500, sec: 85 },
   campus: { max: 23900, sec: 85 },
   center: { max: 25500, sec: 94 },
-  jaguaren: { max: 23400, sec: 101 },
+  amagerbio: { max: 26700, sec: 107 },
   strandpark: { max: 29600, sec: 103 },
+  jaguaren: { max: 23400, sec: 99 },
   copenhill: { max: 39200, sec: 109, perSec: 320 },
 };
 const MIN_SHARE = 0.8;            // et løb skal tage mindst 80% af banens tid

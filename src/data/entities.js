@@ -107,6 +107,26 @@ export const THEMES = {
       l: { frame: 'obst/lamp', box: [60, 28] },
     },
   },
+  // Amager Bio: fadøl i stedet for flasker, flightcases der ruller, kastede krus og trommestikker,
+  // monitorer på gulvet, en mikrofon der svinger fra loftet, og trommesæt og guitarister man skal hoppe over.
+  amagerbio: {
+    midFrames: 2,
+    ents: {
+      b: { frame: 'item/fadoel' },
+      d: { frame: 'obst/flightcase', anim: null, box: [40, 30], vx: -90, score: 250, fx: 'fx/puff' },
+      f: {
+        frame: 'obst/cup', anim: null, box: [20, 22], vx: -160, wave: 0, spin: -540, score: 250, fx: 'fx/foam',
+        variants: [{ frame: 'obst/cup', box: [20, 22], vx: -150, spin: -540, score: 250 }, { frame: 'obst/stick', box: [30, 10], vx: -160, spin: -720, score: 300 }],
+      },
+      k: { frame: 'obst/monitor', box: [40, 26], score: 150 },
+      x: {
+        frame: 'obst/drums', box: [50, 40], vx: -26, bonk: 'BOING!',
+        variants: [{ frame: 'obst/drums', anim: null, box: [50, 40], vx: 0, bonk: 'BOING!' }, { anim: 'guitar_walk', box: [32, 56], vx: -26, bonk: "ROCK'N'ROLL!" }],
+      },
+      // sway: hvor langt (radianer) mikrofonen svinger, swayMs: hvor hurtigt
+      l: { frame: 'obst/mic', box: [30, 30], sway: 0.14, swayMs: 450 },
+    },
+  },
   // Amager Strandpark: kitesurfere og måger i luften, redningskranse der ruller, badebolde der hopper,
   // sandslotte, håndklæder på snor og parasoller og nudister, man skal hoppe over.
   strandpark: {

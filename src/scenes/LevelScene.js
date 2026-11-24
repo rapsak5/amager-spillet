@@ -231,6 +231,7 @@ export default class LevelScene extends Phaser.Scene {
     const s = this.add.sprite(sp.x, y, 'atlas', def.frame).setDepth(DEPTH.ent).setOrigin(0.5, bottom ? 1 : 0.5);
     if (def.anim) s.play(def.anim);
     const e = { sp, def, s, bottom, baseY: y, hp: def.hp ?? 1, alive: true, lastSwingId: -1, phase: sp.x * 0.7 };
+    if (def.sway) { s.setOrigin(0.5, 0); s.y = y - s.height; }   // ophænget er øverst
     this.ents.push(e);
     return e;
   }
@@ -243,6 +244,12 @@ export default class LevelScene extends Phaser.Scene {
 
   entRect(e) {
     const [w, h] = e.def.box || [e.s.width, e.s.height];
+    if (e.def.sway) {
+      // bunden af det, der svinger: ophænget plus længden drejet med vinklen
+      const bx = e.s.x - Math.sin(e.s.rotation) * e.s.height;
+      const by = e.s.y + Math.cos(e.s.rotation) * e.s.height;
+      return { x: bx - w / 2, y: by - h, w, h };
+    }
     return e.bottom ? { x: e.s.x - w / 2, y: e.s.y - h, w, h } : { x: e.s.x - w / 2, y: e.s.y - h / 2, w, h };
   }
 
@@ -259,6 +266,7 @@ export default class LevelScene extends Phaser.Scene {
       if (d.bob) e.s.y = e.baseY + Math.round(Math.sin((now + e.phase) / 260) * d.bob);
       if (d.wave) e.s.y = e.baseY + Math.sin((now + e.phase) / 220) * d.wave;
       if (d.spin) e.s.angle += d.spin * dt;
+      if (d.sway) e.s.rotation = Math.sin((now + e.phase) / (d.swayMs || 450)) * d.sway;
       if (d.bounce) {
         e.vy = (e.vy ?? 0) + 1300 * dt;
         e.s.y += e.vy * dt;

@@ -1,6 +1,6 @@
 // Fælles konstanter. Alt, der skal justeres på spilfølelsen, står i TUNING.
 
-export const VERSION = '0.7.0-pub';
+export const VERSION = '0.8.0-pub';
 
 // Offentlig udgave til promovering. Alle kan spille, vælge fisker og skrive et navn.
 

@@ -15,7 +15,7 @@ export function validEmail(raw) { return EMAIL.test(cleanEmail(raw)); }
 
 const ERRORS = {
   email: 'Det ligner ikke en mailadresse.',
-  notdone: 'Klar alle elleve baner først.',
+  notdone: 'Klar alle tolv baner først.',
   taken: 'Den mail har allerede fået en kode.',
   limit: 'Der er hentet nok koder fra denne enhed.',
   name: 'Vælg først et navn på kortet.',
