@@ -1,0 +1,18 @@
+# Cloudflare Worker til topscorerlisten og rabatkoderne i den offentlige udgave.
+# Deploy: Cloudflare > Workers & Pages > Create > Import a repository > rapsak5/amager-spillet,
+# root directory: server. Eller: npx wrangler deploy fra mappen server/.
+name = "amager-spil-scores"
+main = "worker-public.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGIN = "https://rapsak5.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "amager-spil-scores"
+database_id = "3e4d60cc-24c9-4e11-81a6-33baf6d331d7"
+
+# Secrets sættes i dashboardet (Settings > Variables and Secrets), ikke her:
+#   ADMIN_TOKEN, og valgfrit BREVO_API_KEY
