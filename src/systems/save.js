@@ -43,3 +43,7 @@ export function setName(name) { load().name = name; persist(); }
 export function hasName() { return !!load().name; }
 
 export function reset() { mem = blank(); persist(); }
+
+/** Rabatkoden fra hemmeligheden, hvis spilleren har fået en: { code, email, sent }. */
+export function claim() { return load().claim || null; }
+export function setClaim(c) { load().claim = c; persist(); }
