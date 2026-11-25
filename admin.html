@@ -158,15 +158,16 @@ import { LEVELS as GAME_LEVELS } from './src/data/levels.js';
   function loadSubs() {
     call('/admin/subs').then(function (d) {
       var rows = d.subs || [];
-      var waiting = rows.filter(function (r) { return !r.synced; }).length;
+      var waiting = rows.filter(function (r) { return !r.synced && !r.unsub; }).length;
       var h = '<p class="muted">' + rows.length + ' tilmeldt fra spillet. ' +
         (d.brevo ? 'Brevo er sat op.' : '<span class="bad">Brevo er ikke sat op endnu, så mailene venter her.</span>') + '</p>';
       if (waiting && d.brevo) h += '<div class="row" style="margin:0 0 12px"><button class="main" id="syncsubs">Send ' + waiting + ' til Brevo</button></div>';
       if (!rows.length) { $('out').innerHTML = h; bindSync(); return; }
-      h += '<table><tr><th>Mail</th><th>Hvor</th><th>Hvornår</th><th>Brevo</th></tr>';
+      h += '<table><tr><th>Mail</th><th>Hvor</th><th>Hvornår</th><th>Brevo</th><th>Seneste nummer</th></tr>';
       rows.forEach(function (r) {
         h += '<tr><td>' + esc(r.email) + '</td><td>' + esc(SOURCES[r.source] || r.source || '') + '</td><td class="muted">' + when(r.created) + '</td>' +
-          '<td>' + (r.synced ? '<span class="ok">På listen</span>' : '<span class="bad">Venter</span>') + '</td></tr>';
+          '<td>' + (r.unsub ? '<span class="muted">Afmeldt ' + when(r.unsub) + '</span>' : (r.synced ? '<span class="ok">På listen</span>' : '<span class="bad">Venter</span>')) + '</td>' +
+          '<td>' + (r.welcomed ? '<span class="ok">Sendt ' + when(r.welcomed) + '</span>' : '<span class="muted">Nej</span>') + '</td></tr>';
       });
       $('out').innerHTML = h + '</table>';
       bindSync();

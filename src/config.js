@@ -1,6 +1,6 @@
 // Fælles konstanter. Alt, der skal justeres på spilfølelsen, står i TUNING.
 
-export const VERSION = '0.10.0-pub';
+export const VERSION = '0.11.0-pub';
 
 // Offentlig udgave til promovering. Alle kan spille, vælge fisker og skrive et navn.
 
@@ -78,7 +78,7 @@ export const NEWSLETTER = {
   headline: 'HALVVEJS!',
   lead: 'Mens du puster ud: få nyhedsbrevet Tre ting om AI.',
   pitch: 'Tre korte AI-nyheder hver anden uge.',
-  promise: 'Ingen spam. Afmeld med ét klik i hvert nyhedsbrev.',
+  promise: 'Seneste nummer med det samme. Afmeld når som helst.',
   privacy: 'Mailen bruges kun til nyhedsbrevet.',
   yes: 'JA TAK, TILMELD MIG',
   no: 'NEJ TAK, SPIL VIDERE',

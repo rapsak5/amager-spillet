@@ -27,6 +27,11 @@
 // Nyhedsbrevet Tre ting om AI:
 //   POST /subscribe  { pid, email, source }  -> { ok, synced }
 //        Gemmes i tabellen subs og lægges på Brevo-listen BREVO_LIST_ID, hvis Brevo er sat op.
+//        Nye på listen får straks det seneste nummer: den nyeste kampagne, der er sendt til listen,
+//        sendes som enkeltmail. Brevos {{ unsubscribe }} og {{ mirror }} virker kun i kampagner, så de
+//        skiftes ud med serverens egen afmeldingsside og kampagnens webudgave.
+//   GET  /afmeld?e=<mail>&t=<kode>   -> side med knappen "Afmeld"
+//   POST /afmeld                     -> fjerner mailen fra listen (koden er en HMAC med BREVO_API_KEY)
 
 const FISHERS = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7'];
 const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'brygge', 'center', 'amagerbio', 'strandpark', 'jaguaren', 'copenhill'];
@@ -167,6 +172,8 @@ async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS codes (code TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, pid TEXT NOT NULL, name TEXT, newsletter INTEGER NOT NULL DEFAULT 0, created INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0, used_at INTEGER, mailed INTEGER)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS codes_pid ON codes (pid)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS subs (email TEXT PRIMARY KEY, pid TEXT, source TEXT, created INTEGER NOT NULL, synced INTEGER NOT NULL DEFAULT 0)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS welcomes (email TEXT PRIMARY KEY, campaign INTEGER, at INTEGER NOT NULL)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS unsubs (email TEXT PRIMARY KEY, at INTEGER NOT NULL)'),
   ]);
   schemaReady = true;
 }
@@ -359,6 +366,63 @@ async function mailCode(env, email, code) {
   return ok;
 }
 
+async function brevoGet(env, path) {
+  try {
+    const r = await fetch(`https://api.brevo.com/v3${path}`, { headers: { 'api-key': env.BREVO_API_KEY, Accept: 'application/json' } });
+    return r.ok ? await r.json() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function hmac(env, text) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(env.BREVO_API_KEY || 'mangler'), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(text));
+  return [...new Uint8Array(sig)].slice(0, 16).map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+async function unsubLink(env, email, base) {
+  return `${base}/afmeld?e=${encodeURIComponent(email)}&t=${await hmac(env, `afmeld:${email}`)}`;
+}
+
+/** Står mailen allerede på nyhedsbrevslisten i Brevo? */
+async function onList(env, email) {
+  const id = parseInt(env.BREVO_LIST_ID, 10);
+  const c = await brevoGet(env, `/contacts/${encodeURIComponent(email)}`);
+  return !!(c && Array.isArray(c.listIds) && c.listIds.includes(id) && !c.emailBlacklisted);
+}
+
+/** Den nyeste kampagne, der er sendt til nyhedsbrevslisten. */
+async function latestIssue(env) {
+  const id = parseInt(env.BREVO_LIST_ID, 10);
+  const res = await brevoGet(env, '/emailCampaigns?type=classic&status=sent&limit=20&sort=desc&excludeHtmlContent=true');
+  const list = (res?.campaigns || []).filter((c) => (c.recipients?.lists || []).includes(id));
+  list.sort((a, b) => String(b.sentDate || '').localeCompare(String(a.sentDate || '')));
+  if (!list.length) return null;
+  return brevoGet(env, `/emailCampaigns/${list[0].id}`);
+}
+
+/** Sender det seneste nummer til en ny tilmeldt. Én gang pr. mail. */
+async function sendLatest(env, email, base) {
+  if (!hasBrevo(env) || !env.BREVO_LIST_ID) return false;
+  const seen = await env.DB.prepare('SELECT email FROM welcomes WHERE email = ?').bind(email).first();
+  if (seen) return false;
+  const c = await latestIssue(env);
+  if (!c || !c.htmlContent) return false;
+  const html = c.htmlContent
+    .replace(/\{\{\s*unsubscribe\s*\}\}/g, await unsubLink(env, email, base))
+    .replace(/\{\{\s*mirror\s*\}\}/g, c.shareLink || 'https://ai-workshop.dk');
+  const ok = await brevo(env, '/smtp/email', {
+    sender: { email: env.BREVO_SENDER_EMAIL, name: env.BREVO_SENDER_NAME || 'ai-workshop' },
+    to: [{ email }],
+    subject: c.subject || 'Tre ting om AI',
+    htmlContent: html,
+    tags: ['tre-ting-velkomst'],
+  });
+  if (ok) await env.DB.prepare('INSERT INTO welcomes (email, campaign, at) VALUES (?, ?, ?) ON CONFLICT(email) DO NOTHING').bind(email, c.id || null, Date.now()).run();
+  return ok;
+}
+
 async function addToNewsletter(env, email) {
   if (!env.BREVO_API_KEY || !env.BREVO_LIST_ID) return false;
   const id = parseInt(env.BREVO_LIST_ID, 10);
@@ -367,13 +431,18 @@ async function addToNewsletter(env, email) {
 }
 
 /** Skriver mailen op til nyhedsbrevet: gemmes altid, og sendes til Brevo, hvis Brevo er sat op. */
-async function addSubscriber(env, email, pid, source) {
+async function addSubscriber(env, email, pid, source, base) {
   await env.DB.prepare('INSERT INTO subs (email, pid, source, created) VALUES (?, ?, ?, ?) ON CONFLICT(email) DO NOTHING')
     .bind(email, pid || null, source || null, Date.now()).run();
+  await env.DB.prepare('DELETE FROM unsubs WHERE email = ?').bind(email).run();   // tilmelder man sig igen, gælder det
   const row = await env.DB.prepare('SELECT synced FROM subs WHERE email = ?').bind(email).first();
   if (row?.synced) return true;
+  const already = hasBrevo(env) ? await onList(env, email) : false;
   const ok = await addToNewsletter(env, email);
-  if (ok) await env.DB.prepare('UPDATE subs SET synced = 1 WHERE email = ?').bind(email).run();
+  if (ok) {
+    await env.DB.prepare('UPDATE subs SET synced = 1 WHERE email = ?').bind(email).run();
+    if (!already && base) await sendLatest(env, email, base);
+  }
   return ok;
 }
 
@@ -386,7 +455,7 @@ async function subscribe(env, request, body, json) {
     return json({ ok: false, error: 'slow' }, 429);
   }
   const source = ['halvvejs', 'hemmeligheden'].includes(body?.source) ? body.source : 'spillet';
-  const synced = await addSubscriber(env, email, pid, source);
+  const synced = await addSubscriber(env, email, pid, source, new URL(request.url).origin);
   return json({ ok: true, synced });
 }
 
@@ -411,7 +480,7 @@ async function claim(env, request, body, ctx, json) {
   if (existing) {
     if (newsletter && !existing.newsletter && existing.pid === pid) {
       await env.DB.prepare('UPDATE codes SET newsletter = 1 WHERE email = ?').bind(email).run();
-      ctx?.waitUntil?.(addSubscriber(env, email, pid, 'hemmeligheden'));
+      ctx?.waitUntil?.(addSubscriber(env, email, pid, 'hemmeligheden', new URL(request.url).origin));
     }
     if (existing.pid === pid) return json({ ok: true, code: existing.code, sent: false });
     const recent = existing.mailed && Date.now() - existing.mailed < RESEND_MS;
@@ -438,8 +507,54 @@ async function claim(env, request, body, ctx, json) {
   if (!code) return json({ ok: false, error: 'server' }, 500);
 
   const sent = hasBrevo(env) ? await mailCode(env, email, code) : false;
-  if (newsletter) ctx?.waitUntil?.(addSubscriber(env, email, pid, 'hemmeligheden'));
+  if (newsletter) ctx?.waitUntil?.(addSubscriber(env, email, pid, 'hemmeligheden', new URL(request.url).origin));
   return json({ ok: true, code, sent });
+}
+
+// ---------- Afmelding fra nyhedsbrevet ----------
+
+function page(title, body, status = 200) {
+  const html = `<!DOCTYPE html><html lang="da"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>${title}</title>
+<style>body{margin:0;background:#0b1224;color:#e8ecf4;font:16px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center}
+main{max-width:440px;padding:28px;background:#16203a;border:1px solid #2a3658;border-radius:12px;margin:16px;text-align:center}h1{color:#f2c418;font-size:22px;margin:0 0 10px}
+button{margin-top:14px;padding:11px 20px;border:0;border-radius:8px;background:#f2c418;color:#1a1400;font:600 16px system-ui,sans-serif;cursor:pointer}a{color:#9cc4ff}p{color:#c8d0e2}</style></head><body><main>${body}</main></body></html>`;
+  return new Response(html, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
+}
+
+const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function unsubscribe(env, request, url) {
+  let email;
+  let token;
+  if (request.method === 'POST') {
+    const form = await request.formData().catch(() => null);
+    email = String(form?.get('e') || '');
+    token = String(form?.get('t') || '');
+  } else {
+    email = String(url.searchParams.get('e') || '');
+    token = String(url.searchParams.get('t') || '');
+  }
+  email = email.trim().toLowerCase().slice(0, 254);
+  const bad = () => page('Linket virker ikke', '<h1>Linket virker ikke</h1><p>Brug afmeldingslinket i nyhedsbrevet, eller skriv til kasper@ai-workshop.dk, så afmelder vi dig.</p>', 400);
+  if (!EMAIL.test(email) || !/^[0-9a-f]{32}$/.test(token) || token !== await hmac(env, `afmeld:${email}`)) return bad();
+  if (request.method !== 'POST') {
+    return page('Afmeld Tre ting om AI', `<h1>Afmeld Tre ting om AI?</h1><p>${escHtml(email)} får ikke flere numre, når du trykker på knappen.</p>
+<form method="post" action="/afmeld"><input type="hidden" name="e" value="${escHtml(email)}"><input type="hidden" name="t" value="${token}"><button type="submit">Afmeld</button></form>`);
+  }
+  const id = parseInt(env.BREVO_LIST_ID, 10);
+  let ok = false;
+  try {
+    const r = await fetch(`https://api.brevo.com/v3/contacts/lists/${id}/contacts/remove`, {
+      method: 'POST',
+      headers: { 'api-key': env.BREVO_API_KEY, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ emails: [email] }),
+    });
+    ok = r.ok || r.status === 400;   // 400: mailen står ikke på listen, så den er allerede afmeldt
+  } catch (e) { ok = false; }
+  if (!ok) return page('Prøv igen', '<h1>Det gik ikke</h1><p>Prøv igen om lidt, eller skriv til kasper@ai-workshop.dk.</p>', 502);
+  await env.DB.prepare('INSERT INTO unsubs (email, at) VALUES (?, ?) ON CONFLICT(email) DO UPDATE SET at = excluded.at').bind(email, Date.now()).run();
+  await env.DB.prepare('UPDATE subs SET synced = 0 WHERE email = ?').bind(email).run();
+  return page('Du er afmeldt', `<h1>Du er afmeldt</h1><p>${escHtml(email)} får ikke flere numre af Tre ting om AI.</p><p><a href="https://ai-workshop.dk">ai-workshop.dk</a></p>`);
 }
 
 // ---------- Admin ----------
@@ -482,15 +597,17 @@ async function admin(env, request, url, path, json) {
     return json({ ok: !!found, code: found || null });
   }
   if (request.method === 'GET' && path === '/admin/subs') {
-    const rows = (await env.DB.prepare('SELECT email, source, created, synced FROM subs ORDER BY created DESC').all()).results || [];
+    const rows = (await env.DB.prepare('SELECT s.email, s.source, s.created, s.synced, w.at AS welcomed, u.at AS unsub FROM subs s LEFT JOIN welcomes w ON w.email = s.email LEFT JOIN unsubs u ON u.email = s.email ORDER BY s.created DESC').all()).results || [];
     return json({ subs: rows, brevo: !!(env.BREVO_API_KEY && env.BREVO_LIST_ID) });
   }
   if (request.method === 'POST' && path === '/admin/subs/sync') {
-    const rows = (await env.DB.prepare('SELECT email FROM subs WHERE synced = 0 LIMIT 50').all()).results || [];
+    const rows = (await env.DB.prepare('SELECT email FROM subs WHERE synced = 0 AND email NOT IN (SELECT email FROM unsubs) LIMIT 50').all()).results || [];
     let done = 0;
     for (const r of rows) {
+      const already = await onList(env, r.email);
       if (await addToNewsletter(env, r.email)) {
         await env.DB.prepare('UPDATE subs SET synced = 1 WHERE email = ?').bind(r.email).run();
+        if (!already) await sendLatest(env, r.email, url.origin);
         done++;
       }
     }
@@ -522,6 +639,7 @@ export default {
         if (await limited(env, 'topIp', await ipKey(request))) return json({ ok: false, error: 'slow down' }, 429);
         return await top(env, url, json);
       }
+      if (path === '/afmeld' && (request.method === 'GET' || request.method === 'POST')) return await unsubscribe(env, request, url);
       if (request.method === 'POST') {
         if (!originOk(request, env)) return json({ ok: false, error: 'forbidden' }, 403);
         const body = await readBody(request);
