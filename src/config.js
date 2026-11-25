@@ -1,6 +1,6 @@
 // Fælles konstanter. Alt, der skal justeres på spilfølelsen, står i TUNING.
 
-export const VERSION = '0.8.0-pub';
+export const VERSION = '0.9.0-pub';
 
 // Offentlig udgave til promovering. Alle kan spille, vælge fisker og skrive et navn.
 
@@ -32,7 +32,7 @@ export const TUNING = {
   swingMs: 260,           // hvor længe slaget vises
   swingActiveMs: 190,     // hvor længe slaget rammer
   swingCooldownMs: 340,
-  invulnMs: 900,          // usårlig efter et slag
+  invulnMs: 700,          // usårlig efter et slag (900 før 25/11)
   shotMs: 6000,           // så længe giver et shot dobbelt point og ombyttet styring
   maxHearts: 4,
   beersForSuper: 10,

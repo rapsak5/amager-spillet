@@ -2959,13 +2959,93 @@
     "w": 18,
     "h": 28
    }
+  },
+  "obst/boombox": {
+   "frame": {
+    "x": 2,
+    "y": 1785,
+    "w": 48,
+    "h": 36
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 36
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 36
+   }
+  },
+  "enemy/bather0": {
+   "frame": {
+    "x": 52,
+    "y": 1785,
+    "w": 48,
+    "h": 76
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 76
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 76
+   }
+  },
+  "enemy/bather1": {
+   "frame": {
+    "x": 102,
+    "y": 1785,
+    "w": 48,
+    "h": 76
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 48,
+    "h": 76
+   },
+   "sourceSize": {
+    "w": 48,
+    "h": 76
+   }
+  },
+  "obst/garland": {
+   "frame": {
+    "x": 152,
+    "y": 1785,
+    "w": 88,
+    "h": 260
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 88,
+    "h": 260
+   },
+   "sourceSize": {
+    "w": 88,
+    "h": 260
+   }
   }
  },
  "meta": {
   "image": "atlas.png",
   "size": {
    "w": 1024,
-   "h": 1783
+   "h": 2047
   },
   "scale": "1"
  }

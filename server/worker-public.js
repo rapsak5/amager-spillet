@@ -23,26 +23,27 @@
 //   GET  /admin/rejected                -> de seneste afviste løb (mistanke om snyd)
 
 const FISHERS = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7'];
-const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'center', 'amagerbio', 'strandpark', 'jaguaren', 'copenhill'];
+const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'brygge', 'center', 'amagerbio', 'strandpark', 'jaguaren', 'copenhill'];
 const NAME_MAX = 12;
 
 // Regnet ud fra banerne (src/data/levels.js) med fuld score på alt, shot-bonus og fire hjerter.
-// max:  højeste point en bane kan give, plus 10% luft.
+// max:  højeste point en bane kan give, plus 25% luft (regnet om 25/11, da banerne blev længere og sværere).
 // sec:  hvor mange sekunder banen tager ved fuld fart. Et løb skal mindst tage 80% af det.
 // CopenHill: bossen sender små fjender, så længe kampen varer. Derfor må pointene vokse med tiden.
 const LIMITS = {
-  dragoer: { max: 13500, sec: 69 },
-  lufthavn: { max: 19700, sec: 80 },
-  blaaplanet: { max: 14700, sec: 74 },
-  idraetspark: { max: 16300, sec: 86 },
-  faelled: { max: 22400, sec: 82 },
-  dr: { max: 22500, sec: 85 },
-  campus: { max: 23900, sec: 85 },
-  center: { max: 25500, sec: 94 },
-  amagerbio: { max: 26700, sec: 107 },
-  strandpark: { max: 29600, sec: 103 },
-  jaguaren: { max: 23400, sec: 99 },
-  copenhill: { max: 39200, sec: 109, perSec: 320 },
+  dragoer: { max: 25500, sec: 97 },
+  lufthavn: { max: 30900, sec: 106 },
+  blaaplanet: { max: 28400, sec: 94 },
+  idraetspark: { max: 29700, sec: 125 },
+  faelled: { max: 33800, sec: 134 },
+  dr: { max: 35700, sec: 143 },
+  campus: { max: 33700, sec: 142 },
+  brygge: { max: 39400, sec: 133 },
+  center: { max: 34500, sec: 139 },
+  amagerbio: { max: 36200, sec: 159 },
+  strandpark: { max: 34700, sec: 138 },
+  jaguaren: { max: 32900, sec: 150 },
+  copenhill: { max: 73800, sec: 140, perSec: 600 },
 };
 const MIN_SHARE = 0.8;            // et løb skal tage mindst 80% af banens tid
 const RUN_TTL = 2 * 3600 * 1000;  // et løb skal afsluttes inden for to timer

@@ -1,5 +1,5 @@
 // Spørgsmål til quizkasserne. Kun om Amager. Det første svar er altid det rigtige.
-// Rækkefølgen af svarene blandes i spillet. Fakta tjekket 23/11 2026.
+// Rækkefølgen af svarene blandes i spillet. Fakta tjekket 23/11 2026 (Islands Brygge 25/11).
 
 export const QUIZ = [
   { q: 'Hvad var Amager Bio, før det blev spillested?', a: ['En biograf', 'En fabrik', 'En svømmehal'] },
@@ -40,6 +40,10 @@ export const QUIZ = [
   { q: 'Hvad lå der i bygningerne, før de blev til Amager Centret?', a: ['Et rebslageri', 'Et bryggeri', 'En kaserne'] },
   { q: 'Hvad hedder hovedgaden på Amager?', a: ['Amagerbrogade', 'Strøget', 'Vesterbrogade'] },
   { q: 'Hvilket år åbnede havnebadet på Islands Brygge som byens første?', a: ['2002', '1995', '2010'] },
+  { q: 'Hvilket land er Islands Brygge opkaldt efter?', a: ['Island', 'Irland', 'Grønland'] },
+  { q: 'Hvilket år blev den nuværende Langebro indviet?', a: ['1954', '1903', '1990'] },
+  { q: 'Hvor mange badegæster er havnebadet på Islands Brygge bygget til?', a: ['Cirka 600', 'Cirka 150', 'Cirka 3.000'] },
+  { q: 'Hvem tegnede havnebadet på Islands Brygge?', a: ['PLOT (Bjarke Ingels og Julien De Smedt)', 'Henning Larsen', '3XN'] },
   { q: 'Hvad hedder indkøbscentret i Ørestad, der åbnede i 2004?', a: ["Field's", 'Fisketorvet', 'Waves'] },
   { q: 'Hvilket band indviede Royal Arena i 2017?', a: ['Metallica', 'U2', 'Volbeat'] },
   { q: 'Hvad hedder naturområdet mellem Islands Brygge og Ørestad?', a: ['Amager Fælled', 'Fælledparken', 'Utterslev Mose'] },

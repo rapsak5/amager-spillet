@@ -107,6 +107,23 @@ export const THEMES = {
       l: { frame: 'obst/lamp', box: [60, 28] },
     },
   },
+  // Islands Brygge (25/11): løse kamphunde, måger, boomblastere, rockere og folk, der fester i badetøj.
+  // Rockere og festaber kan man ikke slå: hop over dem. Flagguirlanderne skal man slide under.
+  brygge: {
+    snow: true,
+    midFrames: 2,
+    ents: {
+      d: { anim: 'dog_walk', box: [46, 30], vx: -85, variants: [{ anim: 'dog_walk', box: [46, 30], vx: -85, score: 250 }], score: 250 },
+      f: { anim: 'gull_fly', box: [40, 20], vx: -80, score: 300 },
+      k: { frame: 'obst/boombox', box: [40, 28], score: 250, fx: 'fx/star' },
+      o: { frame: 'obst/beachball', box: [24, 24] },
+      x: {
+        anim: 'rocker_walk', box: [32, 54], vx: -26, bonk: "HVA' GLOR DU PÅ?",
+        variants: [{ anim: 'rocker_walk', box: [32, 54], vx: -26, bonk: "HVA' GLOR DU PÅ?" }, { anim: 'bather_dance', box: [30, 64], vx: -20, bonk: 'SKÅÅÅL!' }],
+      },
+      l: { frame: 'obst/garland', box: [78, 28] },
+    },
+  },
   // Amager Bio: fadøl i stedet for flasker, flightcases der ruller, kastede krus og trommestikker,
   // monitorer på gulvet, en mikrofon der svinger fra loftet, og trommesæt og guitarister man skal hoppe over.
   amagerbio: {

@@ -17,6 +17,7 @@ const NODES = {
   faelled: { x: 248, y: 204, lx: -22, ox: 1 },
   dr: { x: 232, y: 160, lx: -22, ox: 1 },
   campus: { x: 228, y: 118, lx: -22, ox: 1 },
+  brygge: { x: 192, y: 92, lx: -18, ox: 1 },
   center: { x: 296, y: 108, lx: -10, ly: 24, ox: 0.5 },
   amagerbio: { x: 348, y: 110, lx: 22, ox: 0 },
   jaguaren: { x: 322, y: 76, lx: -22, ox: 1 },
