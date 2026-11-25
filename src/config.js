@@ -1,6 +1,6 @@
 // Fælles konstanter. Alt, der skal justeres på spilfølelsen, står i TUNING.
 
-export const VERSION = '0.9.0-pub';
+export const VERSION = '0.10.0-pub';
 
 // Offentlig udgave til promovering. Alle kan spille, vælge fisker og skrive et navn.
 
@@ -68,6 +68,21 @@ export const SECRET = {
   newsletter: 'Ja tak til nyhedsbrevet Tre ting om AI',
   privacy: 'Mailen bruges kun til din kode og, hvis du siger ja, til nyhedsbrevet.',
   howTo: 'Skriv koden, når du booker en workshop på ai-workshop.dk.',
+};
+
+// Nyhedsbrevet Tre ting om AI. Spillet spørger én gang, halvvejs, efter banen med index atLevel
+// (6 = Søndre Campus, bane 7). Tilmelding går til serveren (POST /subscribe) og videre til Brevo.
+export const NEWSLETTER = {
+  atLevel: 6,
+  name: 'Tre ting om AI',
+  headline: 'HALVVEJS!',
+  lead: 'Mens du puster ud: få nyhedsbrevet Tre ting om AI.',
+  pitch: 'Tre korte AI-nyheder hver anden uge.',
+  promise: 'Ingen spam. Afmeld med ét klik i hvert nyhedsbrev.',
+  privacy: 'Mailen bruges kun til nyhedsbrevet.',
+  yes: 'JA TAK, TILMELD MIG',
+  no: 'NEJ TAK, SPIL VIDERE',
+  thanks: 'Du er skrevet op til Tre ting om AI.',
 };
 
 // Fælles topscorerliste og rabatkoder: adressen på Cloudflare Workeren i server/worker-public.js.

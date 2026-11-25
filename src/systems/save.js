@@ -47,3 +47,7 @@ export function reset() { mem = blank(); persist(); }
 /** Rabatkoden fra hemmeligheden, hvis spilleren har fået en: { code, email, sent }. */
 export function claim() { return load().claim || null; }
 export function setClaim(c) { load().claim = c; persist(); }
+
+/** Nyhedsbrevet: 'yes' (tilmeldt), 'no' (sagde nej tak halvvejs) eller null (ikke spurgt endnu). */
+export function newsletter() { return load().newsletter || null; }
+export function setNewsletter(v) { load().newsletter = v; persist(); }

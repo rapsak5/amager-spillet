@@ -5,6 +5,7 @@
 
 import { GAME_W, GAME_H } from '../config.js';
 import { LEVELS } from '../data/levels.js';
+import * as Newsletter from '../systems/newsletter.js';
 import { txt, panel, button, dim, pad, C } from '../game/ui.js';
 import { isMuted, toggleMute } from '../systems/audio.js';
 
@@ -31,7 +32,8 @@ export default class ResultScene extends Phaser.Scene {
       if (d.isBest) txt(this, cx, 244, 'NY REKORD!', { font: 'small_o', scale: 2, tint: 0x8af0a0 });
       const next = () => {
         this.scene.stop('Level');
-        this.scene.start(d.last ? 'Finale' : 'Map');
+        // halvvejs spørger spillet én gang om nyhedsbrevet
+        this.scene.start(d.last ? 'Finale' : (Newsletter.shouldAsk(d.levelIndex) ? 'Newsletter' : 'Map'));
       };
       button(this, cx, 280, 200, 34, d.last ? 'FINALEN' : 'VIDERE', next);
       this.input.keyboard?.once('keydown-ENTER', next);

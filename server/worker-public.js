@@ -21,6 +21,12 @@
 //   GET  /admin/codes[?code=AMA-...]    -> alle rabatkoder, eller én
 //   POST /admin/used   { code, used }   -> markér en kode som brugt (used: false fortryder)
 //   GET  /admin/rejected                -> de seneste afviste løb (mistanke om snyd)
+//   GET  /admin/subs                    -> tilmeldte til nyhedsbrevet
+//   POST /admin/subs/sync               -> send tilmeldte, der ikke er kommet til Brevo endnu
+//
+// Nyhedsbrevet Tre ting om AI:
+//   POST /subscribe  { pid, email, source }  -> { ok, synced }
+//        Gemmes i tabellen subs og lægges på Brevo-listen BREVO_LIST_ID, hvis Brevo er sat op.
 
 const FISHERS = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7'];
 const LEVELS = ['dragoer', 'lufthavn', 'blaaplanet', 'idraetspark', 'faelled', 'dr', 'campus', 'brygge', 'center', 'amagerbio', 'strandpark', 'jaguaren', 'copenhill'];
@@ -65,6 +71,8 @@ const RATE = {
   finishPid: [60, 600],
   claimIp: [10, 86400],
   claimPid: [10, 3600],
+  subIp: [20, 86400],
+  subPid: [5, 86400],
   topIp: [600, 60],
 };
 
@@ -158,6 +166,7 @@ async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS hits (k TEXT NOT NULL, w INTEGER NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (k, w))'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS codes (code TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, pid TEXT NOT NULL, name TEXT, newsletter INTEGER NOT NULL DEFAULT 0, created INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0, used_at INTEGER, mailed INTEGER)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS codes_pid ON codes (pid)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS subs (email TEXT PRIMARY KEY, pid TEXT, source TEXT, created INTEGER NOT NULL, synced INTEGER NOT NULL DEFAULT 0)'),
   ]);
   schemaReady = true;
 }
@@ -357,6 +366,30 @@ async function addToNewsletter(env, email) {
   return brevo(env, '/contacts', { email, listIds: [id], updateEnabled: true });
 }
 
+/** Skriver mailen op til nyhedsbrevet: gemmes altid, og sendes til Brevo, hvis Brevo er sat op. */
+async function addSubscriber(env, email, pid, source) {
+  await env.DB.prepare('INSERT INTO subs (email, pid, source, created) VALUES (?, ?, ?, ?) ON CONFLICT(email) DO NOTHING')
+    .bind(email, pid || null, source || null, Date.now()).run();
+  const row = await env.DB.prepare('SELECT synced FROM subs WHERE email = ?').bind(email).first();
+  if (row?.synced) return true;
+  const ok = await addToNewsletter(env, email);
+  if (ok) await env.DB.prepare('UPDATE subs SET synced = 1 WHERE email = ?').bind(email).run();
+  return ok;
+}
+
+async function subscribe(env, request, body, json) {
+  const pid = body?.pid;
+  if (!validPid(pid)) return json({ ok: false, error: 'email' }, 400);
+  const email = String(body?.email || '').trim().toLowerCase().slice(0, 254);
+  if (!EMAIL.test(email)) return json({ ok: false, error: 'email' }, 400);
+  if (await limited(env, 'subPid', pid) || await limited(env, 'subIp', await ipKey(request))) {
+    return json({ ok: false, error: 'slow' }, 429);
+  }
+  const source = ['halvvejs', 'hemmeligheden'].includes(body?.source) ? body.source : 'spillet';
+  const synced = await addSubscriber(env, email, pid, source);
+  return json({ ok: true, synced });
+}
+
 async function claim(env, request, body, ctx, json) {
   const pid = body?.pid;
   if (!validPid(pid)) return json({ ok: false, error: 'name' }, 400);
@@ -378,7 +411,7 @@ async function claim(env, request, body, ctx, json) {
   if (existing) {
     if (newsletter && !existing.newsletter && existing.pid === pid) {
       await env.DB.prepare('UPDATE codes SET newsletter = 1 WHERE email = ?').bind(email).run();
-      ctx?.waitUntil?.(addToNewsletter(env, email));
+      ctx?.waitUntil?.(addSubscriber(env, email, pid, 'hemmeligheden'));
     }
     if (existing.pid === pid) return json({ ok: true, code: existing.code, sent: false });
     const recent = existing.mailed && Date.now() - existing.mailed < RESEND_MS;
@@ -405,7 +438,7 @@ async function claim(env, request, body, ctx, json) {
   if (!code) return json({ ok: false, error: 'server' }, 500);
 
   const sent = hasBrevo(env) ? await mailCode(env, email, code) : false;
-  if (newsletter) ctx?.waitUntil?.(addToNewsletter(env, email));
+  if (newsletter) ctx?.waitUntil?.(addSubscriber(env, email, pid, 'hemmeligheden'));
   return json({ ok: true, code, sent });
 }
 
@@ -448,6 +481,21 @@ async function admin(env, request, url, path, json) {
     const found = await env.DB.prepare('SELECT code, used FROM codes WHERE code = ?').bind(code).first();
     return json({ ok: !!found, code: found || null });
   }
+  if (request.method === 'GET' && path === '/admin/subs') {
+    const rows = (await env.DB.prepare('SELECT email, source, created, synced FROM subs ORDER BY created DESC').all()).results || [];
+    return json({ subs: rows, brevo: !!(env.BREVO_API_KEY && env.BREVO_LIST_ID) });
+  }
+  if (request.method === 'POST' && path === '/admin/subs/sync') {
+    const rows = (await env.DB.prepare('SELECT email FROM subs WHERE synced = 0 LIMIT 50').all()).results || [];
+    let done = 0;
+    for (const r of rows) {
+      if (await addToNewsletter(env, r.email)) {
+        await env.DB.prepare('UPDATE subs SET synced = 1 WHERE email = ?').bind(r.email).run();
+        done++;
+      }
+    }
+    return json({ ok: true, synced: done, tried: rows.length });
+  }
   if (request.method === 'GET' && path === '/admin/rejected') {
     const rows = (await env.DB.prepare(
       'SELECT r.pid, p.name, r.level, r.score, r.started, r.finished, r.note FROM runs r LEFT JOIN players p ON p.pid = r.pid WHERE r.state = ? ORDER BY r.finished DESC LIMIT 200'
@@ -482,6 +530,7 @@ export default {
         if (path === '/run/start') return await runStart(env, request, body, json);
         if (path === '/run/finish') return await runFinish(env, request, body, json);
         if (path === '/claim') return await claim(env, request, body, ctx, json);
+        if (path === '/subscribe') return await subscribe(env, request, body, json);
       }
       if (path === '/') return json({ ok: true, name: 'amager-spil-scores' });
       return json({ ok: false, error: 'not found' }, 404);

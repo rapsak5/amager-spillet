@@ -8,6 +8,10 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGIN = "https://rapsak5.github.io"
+# Brevo: afsender og listen "Tre ting om AI" (id 3). API-nøglen er en secret i dashboardet.
+BREVO_SENDER_EMAIL = "kasper@ai-workshop.dk"
+BREVO_SENDER_NAME = "Kasper fra ai-workshop"
+BREVO_LIST_ID = "3"
 
 [[d1_databases]]
 binding = "DB"
@@ -15,4 +19,4 @@ database_name = "amager-spil-scores"
 database_id = "3e4d60cc-24c9-4e11-81a6-33baf6d331d7"
 
 # Secrets sættes i dashboardet (Settings > Variables and Secrets), ikke her:
-#   ADMIN_TOKEN, og valgfrit BREVO_API_KEY
+#   ADMIN_TOKEN og BREVO_API_KEY

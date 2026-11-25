@@ -37,7 +37,7 @@
 <body>
 <main>
   <h1>Admin: Julefrokost på Amager</h1>
-  <p class="sub">Topscorerlisten, afviste løb og rabatkoder. Kodeordet er dit ADMIN_TOKEN fra Cloudflare. Det gemmes kun i denne fane og glemmes, når du lukker den.</p>
+  <p class="sub">Topscorerlisten, afviste løb, rabatkoder og nyhedsbrevet. Kodeordet er dit ADMIN_TOKEN fra Cloudflare. Det gemmes kun i denne fane og glemmes, når du lukker den.</p>
 
   <div class="card">
     <label for="token">ADMIN_TOKEN</label>
@@ -54,6 +54,7 @@
       <button data-tab="players" class="on">Spillere</button>
       <button data-tab="rejected">Afviste løb</button>
       <button data-tab="codes">Rabatkoder</button>
+      <button data-tab="subs">Nyhedsbrev</button>
     </div>
     <div id="codefind" class="row" hidden style="margin-top:0;margin-bottom:12px">
       <input id="codeq" type="text" placeholder="Find en kode, fx AMA-7KQ4-X9PM" style="max-width:300px">
@@ -103,6 +104,7 @@ import { LEVELS as GAME_LEVELS } from './src/data/levels.js';
     $('out').innerHTML = '<span class="muted">Henter ...</span>';
     if (name === 'players') loadPlayers();
     else if (name === 'rejected') loadRejected();
+    else if (name === 'subs') loadSubs();
     else loadCodes();
   }
 
@@ -150,6 +152,33 @@ import { LEVELS as GAME_LEVELS } from './src/data/levels.js';
       });
       $('out').innerHTML = h + '</table>';
     }).catch(fail);
+  }
+
+  var SOURCES = { halvvejs: 'Halvvejs i spillet', hemmeligheden: 'Ved rabatkoden', spillet: 'Spillet' };
+  function loadSubs() {
+    call('/admin/subs').then(function (d) {
+      var rows = d.subs || [];
+      var waiting = rows.filter(function (r) { return !r.synced; }).length;
+      var h = '<p class="muted">' + rows.length + ' tilmeldt fra spillet. ' +
+        (d.brevo ? 'Brevo er sat op.' : '<span class="bad">Brevo er ikke sat op endnu, så mailene venter her.</span>') + '</p>';
+      if (waiting && d.brevo) h += '<div class="row" style="margin:0 0 12px"><button class="main" id="syncsubs">Send ' + waiting + ' til Brevo</button></div>';
+      if (!rows.length) { $('out').innerHTML = h; bindSync(); return; }
+      h += '<table><tr><th>Mail</th><th>Hvor</th><th>Hvornår</th><th>Brevo</th></tr>';
+      rows.forEach(function (r) {
+        h += '<tr><td>' + esc(r.email) + '</td><td>' + esc(SOURCES[r.source] || r.source || '') + '</td><td class="muted">' + when(r.created) + '</td>' +
+          '<td>' + (r.synced ? '<span class="ok">På listen</span>' : '<span class="bad">Venter</span>') + '</td></tr>';
+      });
+      $('out').innerHTML = h + '</table>';
+      bindSync();
+    }).catch(fail);
+  }
+  function bindSync() {
+    var b = $('syncsubs');
+    if (!b) return;
+    b.onclick = function () {
+      b.disabled = true; b.textContent = 'Sender ...';
+      call('/admin/subs/sync', {}).then(function (r) { msg(r.synced + ' af ' + r.tried + ' sendt til Brevo.', r.synced === r.tried ? 'ok' : 'bad'); loadSubs(); }).catch(fail);
+    };
   }
 
   function login() {

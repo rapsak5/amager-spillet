@@ -67,6 +67,14 @@ export default class SecretScene extends Phaser.Scene {
     // tilmelding til nyhedsbrevet er frivillig og står derfor ikke krydset af
     const bx = 140;
     const by = 224;
+    if (Save.newsletter() === 'yes') {
+      this.newsletter = true;
+      this.keep(txt(this, cx, by, 'Du får allerede Tre ting om AI. Tak!', { font: 'ui', tint: C.soft }));
+      this.msg = this.keep(txt(this, cx, 248, SECRET.privacy, { font: 'small', tint: C.soft }));
+      this.go = button(this, cx, 282, 220, 30, 'FÅ MIN KODE', () => this.submit(), { color: C.green });
+      this.buttons.push(this.go);
+      return;
+    }
     const box = this.keep(this.add.graphics());
     const drawBox = () => {
       box.clear();
@@ -100,6 +108,7 @@ export default class SecretScene extends Phaser.Scene {
       this.go.setLabel('FÅ MIN KODE');
       return this.fail(res.error);
     }
+    if (this.newsletter) Save.setNewsletter('yes');
     sfx('win');
     this.showCode(res);
   }
