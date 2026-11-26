@@ -2,12 +2,14 @@
 
 Lille 16-bit pixelspil fra ai-workshop.dk. Spilles i browseren, også på mobilen. Skriv dit navn, vælg en fisker og kom på topscorerlisten. Klar alle tretten baner og lås hemmeligheden op: en personlig rabatkode til en workshop fra ai-workshop.
 
-Spil: https://rapsak5.github.io/amager-spillet/
+Spil: https://minikurser.dk/julefrokost/
+
+Fra 26/11 2026 ligger spillet i repoet rapsak5/minikurser-web, mappen `julefrokost`. Ret spillet der. Her ligger kun serveren (`server/`), og index.html og admin.html sender videre til minikurser.dk. Mapperne src, assets og vendor her er den gamle kopi.
 
 - Spillet: almindelig JavaScript med Phaser 4, uden build-trin. Start i `index.html`.
 - Topscorerlisten: Cloudflare Worker i `server/worker-public.js` med D1-databasen `amager-spil-scores` bundet som `DB`. Variabler: `ALLOWED_ORIGIN` og secret `ADMIN_TOKEN`.
 - Snyd: point kommer kun ind gennem et løb, som serveren selv har startet og taget tid på (`/run/start` og `/run/finish`). Et løb, der er hurtigere end banen kan løbes, eller giver flere point end banen har, bliver afvist. Der er grænser for, hvor tit man kan kalde serveren, og kun spillets egen side må sende.
 - Rabatkoder: `POST /claim` giver en kode til spillere med godkendte løb på alle tretten baner. Én kode pr. mail, højst 3 pr. enhed. `GET /admin/codes` viser koderne, og `POST /admin/used` med `{ "code": "AMA-..." }` markerer en kode som brugt. Valgfrit til mail og nyhedsbrev: `BREVO_API_KEY` (secret), `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` og `BREVO_LIST_ID`.
 - Skjul et navn: `POST /admin/hide` med `{ "pid": "...", "hidden": true }` og headeren `Authorization: Bearer <ADMIN_TOKEN>`. `GET /admin/players` viser alle spillere med pid, og `GET /admin/rejected` viser afviste løb. Uden `ADMIN_TOKEN` (mindst 16 tegn) er admin slået fra.
-- Admin-side: `admin.html` (https://rapsak5.github.io/amager-spillet/admin.html). Indsæt `ADMIN_TOKEN`, så kan du se spillere og skjule navne, se afviste løb og finde eller markere rabatkoder som brugt. Kodeordet gemmes kun i fanen.
+- Admin-side: `admin.html` (https://minikurser.dk/julefrokost/admin.html). Indsæt `ADMIN_TOKEN`, så kan du se spillere og skjule navne, se afviste løb og finde eller markere rabatkoder som brugt. Kodeordet gemmes kun i fanen.
 - Nyhedsbrevet Tre ting om AI: spillet spørger én gang halvvejs (efter bane 7, `NEWSLETTER` i `src/config.js`). `POST /subscribe` gemmer mailen i tabellen `subs` og lægger den på Brevo-listen. Afsender og liste står i `server/wrangler.toml`, og `BREVO_API_KEY` er en secret. Admin-siden har en fane med de tilmeldte. Nye på listen får straks det seneste nummer (den nyeste kampagne sendt til listen), og afmeldingslinket i den mail går til `/afmeld` på serveren.
